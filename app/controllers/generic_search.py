@@ -1,9 +1,11 @@
 from app.models.project import Project
+from app.models.app import App
 from app.models.user import User
 from app.models.tags import Tag
 from app.schemas.tags import TagListSchema
 from app.schemas.user import UserListSchema
 from app.schemas.project import ProjectListSchema
+from app.schemas import AppSchema
 from flask import current_app
 from flask_restful import Resource, request
 from app.models.project import Project
@@ -18,7 +20,7 @@ class GenericSearchView(Resource):
         keywords = request.args.get('keywords', '')
         search_type = request.args.get('type', None)
 
-        search_type_enum = ['projects', 'users', 'tags']
+        search_type_enum = ['projects', 'apps', 'users', 'tags']
         if search_type and search_type not in search_type_enum:
             return dict(
                 message=f"""Invalid type provided, should be one of {
@@ -30,6 +32,7 @@ class GenericSearchView(Resource):
 
         # Schemas
         projectSchema = ProjectListSchema(many=True)
+        appSchema = AppSchema(many=True)
         userSchema = UserListSchema(many=True)
         tagSchema = TagListSchema(many=True)
 
@@ -77,6 +80,19 @@ class GenericSearchView(Resource):
                 return_object['projects'] = {
                     'pagination': create_pagination(projects_pagination),
                     'items': json.loads(project_data)
+                }
+
+        # Apps
+        if not search_type or search_type == 'apps':
+            apps_pagination = App.query.filter(
+                App.name.ilike('%'+keywords+'%')
+            ).order_by(App.date_created.desc()).paginate(
+                page=int(page), per_page=int(per_page), error_out=False)
+            app_data, _ = appSchema.dumps(apps_pagination.items)
+            if apps_pagination.total > 0:
+                return_object['apps'] = {
+                    'pagination': create_pagination(apps_pagination),
+                    'items': json.loads(app_data)
                 }
 
         # Tags
