@@ -22,7 +22,7 @@ from .transactions import TransactionRecordView, TransactionRecordDetailView, Cr
 from .project import (
     ProjectsView, ProjectDetailView, UserProjectsView, ProjectGetCostsView, ClusterProjectsView, ProjectPinView,
     ProjectDisableView, ProjectEnableView)
-from .app import (AppsView, ProjectAppsView, AppDetailView, AppLogsView,
+from .app import (AppsView, ProjectAppsView, AppDetailView, AppLogsView, MLProjectAppsView,
                   AppRevertView, AppReviseView, AppRedeployView, AppDisableView, AppEnableView, AppDockerWebhookListenerView)
 from .registry import RegistriesView
 from .billing_invoice import (

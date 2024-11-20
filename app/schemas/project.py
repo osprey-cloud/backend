@@ -6,9 +6,11 @@ from app.models.user import User
 from app.models.project_users import ProjectFollowers
 
 
-class ProjectListSchema(Schema):
+class ProjectMiniListSchema(Schema):
     id = fields.UUID(dump_only=True)
     name = fields.String()
+    alias = fields.String()
+    disabled = fields.Boolean()
     description = fields.String()
 
 

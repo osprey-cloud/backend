@@ -14,7 +14,7 @@ from app.controllers import (
     UserAdminUpdateView, AppRevertView, ProjectGetCostsView, TransactionRecordView, CreditTransactionRecordView, CreditPurchaseTransactionRecordView,
     BillingInvoiceView, BillingInvoiceNotificationView, SystemSummaryView, CreditDetailView, ProjectUsersView, ProjectUsersTransferView, AppReviseView,
     ProjectUsersHandleInviteView, ClusterProjectsView, ProjectDisableView, ProjectEnableView, AppRedeployView, AppDisableView, AppEnableView,
-    TagsView, TagsDetailView, TagFollowingView,GenericSearchView,
+    TagsView, TagsDetailView, TagFollowingView, GenericSearchView, MLProjectAppsView,
     UserDisableView, UserEnableView, AppDockerWebhookListenerView, UserFollowersView, UserFollowView, ProjectFollowingView, ActivityFeedView)
 from app.controllers.app import AppRevisionsView
 from app.controllers.billing_invoice import BillingInvoiceDetailView
@@ -52,7 +52,7 @@ api.add_resource(ActivityFeedView, '/activity_feed')
 # Deployments
 api.add_resource(DeploymentsView, '/deployments', endpoint='deployments')
 
-#Generic search
+# Generic search
 api.add_resource(GenericSearchView, '/search')
 
 # Clusters
@@ -157,6 +157,7 @@ api.add_resource(UserProjectsView, '/users/<string:user_id>/projects')
 api.add_resource(TagsView, '/tags')
 api.add_resource(TagsDetailView, '/tags/<string:tag_id>')
 api.add_resource(TagFollowingView, '/tags/<string:tag_id>/following')
+
 # App routes
 api.add_resource(AppsView, '/apps')
 api.add_resource(AppDetailView, '/apps/<string:app_id>')
@@ -173,7 +174,10 @@ api.add_resource(
 api.add_resource(
     AppDockerWebhookListenerView, '/apps/<string:app_id>/<string:user_id>/docker/<string:tag>/webhook')
 api.add_resource(
+    MLProjectAppsView, '/projects/<string:project_id>/apps/ml')
+api.add_resource(
     AppLogsView, '/projects/<string:project_id>/apps/<string:app_id>/logs')
+
 
 # Registry routes
 api.add_resource(RegistriesView, '/registries')

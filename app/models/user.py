@@ -9,6 +9,7 @@ from ..models import db
 
 from app.models.model_mixin import ModelMixin
 
+
 class Followers(ModelMixin):
     """ followers table definition """
 

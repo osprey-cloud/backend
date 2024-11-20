@@ -54,7 +54,8 @@ class AppSchema(Schema):
     def get_service(self, obj):
         # For more infor https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
         KUBE_SERVICE_PORT = current_app.config['KUBE_SERVICE_PORT']
-        service_url = f'http://{obj.alias}-service.{obj.project.alias}.svc.cluster.local'
+        service_url = f'''http://{obj.alias}-service.{
+            obj.project.alias}.svc.cluster.local'''
         # Note: need to append port 3000 for preivously built apps
         if KUBE_SERVICE_PORT != 80:
             service_url += f':{KUBE_SERVICE_PORT}'
@@ -73,3 +74,8 @@ class AppDeploySchema(AppSchema):
     is_notebook = fields.Boolean(required=False)
     project_id = fields.String(required=False)
     apps = fields.List(fields.Nested(AppMultiDeploySchema), load_only=True)
+
+
+class MLAppDeploySchema(Schema):
+    name = fields.String(required=True)
+    is_notebook = fields.Boolean(required=True)
