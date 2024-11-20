@@ -48,3 +48,7 @@ class ClusterSchema(Schema):
     )
     sub_domain = fields.String(required=True)
     date_created = fields.Date(dump_only=True)
+
+
+class ClusterDetailSchema(ClusterSchema):
+    token = fields.String()

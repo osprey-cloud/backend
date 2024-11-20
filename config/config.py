@@ -45,6 +45,9 @@ class Base:
     # logger app url
     LOGGER_APP_URL = os.getenv('LOGGER_APP_URL', None)
 
+    # mlops api
+    MLOPS_API_URL = os.getenv('MLOPS_API_URL', None)
+
 
 class Development(Base):
     """ development config """
