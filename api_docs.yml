@@ -3238,39 +3238,6 @@ paths:
         500:
           description: "Internal Server Error"
 
-    get:
-      tags:
-        - apps
-      consumes:
-        - application/json
-      parameters:
-        - in: header
-          name: Authorization
-          required: true
-          description: "Bearer [token]"
-        - in: path
-          name: project_id
-          required: true
-          type: string
-        - in: query
-          name: page
-          type: integer
-          description: Page number
-        - in: query
-          name: per_page
-          type: integer
-          description: Number of items per page
-
-      produces:
-        - application/json
-      responses:
-        200:
-          description: "Success"
-        400:
-          description: "Bad request"
-        500:
-          description: "Internal Server Error"
-
   "/apps/{app_id}":
     get:
       tags:
