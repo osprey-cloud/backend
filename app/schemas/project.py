@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, validate
 from app.helpers.age_utility import get_item_age
 from app.models.app import App
 from flask_jwt_extended import get_jwt_identity
+from app.models.tags import TagFollowers
 from app.models.user import User
 from app.models.project_users import ProjectFollowers
 
@@ -18,6 +19,7 @@ class ProjectIndexSchema(Schema):
     id = fields.Method("get_id", dump_only=True)
     name = fields.Method("get_name", dump_only=True)
     description = fields.Method("get_description", dump_only=True)
+    is_following = fields.Method("get_is_following", dump_only=True)
 
     def get_id(self, obj):
         return str(obj.project.id)
@@ -27,7 +29,11 @@ class ProjectIndexSchema(Schema):
 
     def get_description(self, obj):
         return obj.project.description
-
+    
+    def get_is_following(self, obj):
+        current_user_id = get_jwt_identity()
+        tag_id = obj.id
+        return TagFollowers.check_exists(user_id=current_user_id, tag_id=tag_id)
 
 class ProjectListSchema(Schema):
     id = fields.UUID(dump_only=True)
