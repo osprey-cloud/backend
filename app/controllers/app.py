@@ -669,6 +669,74 @@ class AppDetailView(Resource):
         })
 
     @jwt_required
+    def delete(self, app_id):
+        """
+         delete a single application
+        """
+        try:
+
+            current_user_id = get_jwt_identity()
+            current_user_roles = get_jwt_claims()['roles']
+
+            app = App.get_by_id(app_id)
+            if not app:
+                return dict(status='fail', message=f'app with id {app_id} not found'), 404
+
+            project = app.project
+
+            if not project:
+                return dict(status='fail', message='Internal server error'), 500
+
+            if not is_owner_or_admin(project, current_user_id, current_user_roles):
+                if not is_authorised_project_user(project, current_user_id, 'admin'):
+                    return dict(status='fail', message='Unauthorised'), 403
+
+            cluster = project.cluster
+            namespace = project.alias
+
+            if not cluster or not namespace:
+                log_activity('App', status='Failed',
+                             operation='Delete',
+                             description='Internal server error',
+                             a_project=project,
+                             a_cluster_id=project.cluster_id,
+                             a_app=app)
+                return dict(status='fail', message='Internal server error'), 500
+
+            kube_host = cluster.host
+            kube_token = cluster.token
+            kube_client = create_kube_clients(kube_host, kube_token)
+
+            # delete deployment and service for the app
+            delete_cluster_app(kube_client, namespace, app)
+
+            # delete the app from the database
+            deleted = app.soft_delete()
+
+            if not deleted:
+                log_activity('App', status='Failed',
+                             operation='Delete',
+                             description='Internal server error',
+                             a_project=project,
+                             a_cluster_id=project.cluster_id,
+                             a_app=app)
+                return dict(status='fail', message='Internal server error'), 500
+
+            log_activity('App', status='Success',
+                         operation='Delete',
+                         description=f'App {app_id} deleted successfully',
+                         a_project=project,
+                         a_cluster_id=project.cluster_id,
+                         a_app=app)
+            return dict(status='success', message=f'App {app_id} deleted successfully'), 200
+
+        except client.rest.ApiException as e:
+            return dict(status='fail', message=json.loads(e.body)), 500
+
+        except Exception as e:
+            return dict(status='fail', message=str(e)), 500
+
+    @jwt_required
     def patch(self, app_id):
 
         app_schema = AppSchema(partial=True, exclude=["name"])
