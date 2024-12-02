@@ -88,7 +88,7 @@ SQLAlchemy-Utils==0.36.1
 toml==0.10.2
 typing==3.6.6
 typing_extensions==4.1.1
-urllib3==1.25.3
+urllib3==1.26.18
 vine==5.0.0
 virtualenv==16.6.0
 wcwidth==0.2.5
