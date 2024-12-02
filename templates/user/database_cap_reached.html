@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Full</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #EAF0F3;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        .logo-greeting {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            max-width: 80px;
+        }
+        .title {
+            font-size: 30px;
+            color: black;
+        }
+        .content {
+            text-align: center;
+            color: #333333;
+        }
+        .name{
+            text-align: left;
+        }
+        .content ul {
+            text-align: left;
+            margin-top: 0px;
+        }
+        .signature{
+            margin-top: 20px;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+        .social-media-divider {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 0;
+            width: 100%;
+        }       
+        .social-media {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center; /* Align items vertically in the center */
+        }
+        .social-media h3 {
+        display: block;
+        text-align: center;
+        color: #333333; 
+        }
+        .social-media a-container {
+            display: flex;
+            justify-content: center;
+        }
+        .social-media a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .social-media i {
+            font-size: 24px;
+        }
+        .copyright {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+        }
+        @media only screen and (max-width: 600px) {
+            /* body, p, a {
+                font-size: 14px !important;
+            } */
+            h1{
+                font-size: 20px !important;
+            }
+            .mobile-padding {
+                padding: 10px !important;
+            }
+            .mobile-margin {
+                margin: 10px !important;
+            }
+            .logo{
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo-greeting">
+            <img src="https://raw.githubusercontent.com/crane-cloud/frontend/develop/public/favicon.png" alt="Logo" class="logo">
+                <h1 class="title">Your Database is FULL!</h1>
+            
+        </div>
+        <div class="content">
+            <h3 class="name">Hello, {{name}}</h3>
+            <p>We're writing to inform you that your database has <b>reached its allocated limit.</b> This means you may experience disruptions in your service.</p>
+            <p style="text-align: left;">This is because:</p>
+            <ul>
+                <li>You cannot add data in existing projects.</li>
+                <li>You cannot update data in existing projects.</li>
+                <li>You can only view data in existing projects.</li>
+            </ul>    
+            <p style="text-align: left; margin-top: 20px;">Please take immediate action to restore service. If you need further assistance, contact our support team.</p>
+        </div>
+        <div class="content">
+            <p>You can always get more storage by <br><br><a href="">Purchasing here</a>.</p>   
+            <h2>Not ready to get more storage?</h2> <a href="">Delete files to free up space</a>.
+            <p class="signature">Cheers!<br>Crane Cloud Team</p>
+        </div>
+
+        <hr class="social-media-divider">
+
+        <div class="social-media"> 
+                <h3>Connect with us</h3>
+
+            <div class="a-container">
+                <a href=""><i class="fab fa-facebook" target="_blank" style="font-size:30px;color:rgb(1, 101, 225)" ></i></a>
+                <a href="https://medium.com/cranecloud" target="_blank" ><i class="fab fa-medium" style="font-size:24px;color:grey"></i></a>
+                <a href="https://www.linkedin.com/company/cranecloud/"><i class="fab fa-linkedin" style="font-size:24px;color:rgb(10, 102, 194)"></i></a>
+                <a href=""><i class="fab fa-instagram" target="_blank" style="font-size:24px;color:rgb(193, 53, 132)"></i></a>
+                <a href="https://www.youtube.com/@cranecloud571" target="_blank"><i class="fab fa-youtube" style="font-size:24px;color:red"></i></a>
+                <a href="https://twitter.com/cranecloud_io" target="_blank"><i class="fa-brands fa-x-twitter" style="font-size:24px;color:black"></i></a>
+            </div>
+            
+            <div class="copyright">
+                <p>Copyright &copy; 2024 Crane Cloud Limited</p>
+                <p>This email was meant for {{email}}. If you received this email by mistake, please disregard it. <br>If you have any questions or need further assistance, please contact our support team.</p>
+            </div>
+        </div> 
+    </div>
+</body>
+</html>

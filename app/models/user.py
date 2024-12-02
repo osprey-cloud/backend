@@ -14,7 +14,7 @@ from app.models.credit_assignments import CreditAssignment
 class User(ModelMixin):
     """ user table definition """
 
-    _tablename_ = "users"
+    _tablename_ = "users"   
 
     # fields of the user table
     id = db.Column(UUID(as_uuid=True), primary_key=True,
