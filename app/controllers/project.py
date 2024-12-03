@@ -21,7 +21,7 @@ from app.schemas.tags import TagSchema
 from flask_restful import Resource, request
 from kubernetes import client
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt_claims
-from app.schemas.monitoring_metrics import BillingMetricsSchema
+from app.schemas.monitoring_metrics import BillingMetricsSchema, ProjectGraphSchema
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import or_, func
 from app.helpers.crane_app_logger import logger
@@ -216,7 +216,6 @@ class ProjectsView(Resource):
     def get(self):
         """
         """
-
         current_user_id = get_jwt_identity()
         current_user_roles = get_jwt_claims()['roles']
         page = request.args.get('page', 1, type=int)
@@ -224,6 +223,13 @@ class ProjectsView(Resource):
         keywords = request.args.get('keywords', '')
         disabled = request.args.get('disabled')
         project_type = request.args.get('project_type')
+
+        graph_filter_data = {
+            'start': request.args.get('start', '2018-01-01'),
+            'end': request.args.get('end', datetime.datetime.now().strftime('%Y-%m-%d')),
+            'set_by': request.args.get('set_by', 'month')
+        }
+        series = request.args.get('series', 'false').lower() == 'true'
 
         project_schema = ProjectSchema(many=True)
         projects = []
@@ -332,12 +338,37 @@ class ProjectsView(Resource):
         user.save()
         # ADD a logger for when user.save does not work
 
-        return dict(status='success',
-                    data=dict(
-                        metadata=project_metadata,
-                        pagination=pagination_data,
-                        projects=json.loads(project_data))), 200
+         # If series is requested, include graph data based on filtered dates
+        if series:
+            validated_query_data, errors = ProjectGraphSchema().load(graph_filter_data)
+            if errors:
+                return dict(status='fail', message=errors), 400
 
+            start = validated_query_data['start']
+            end = validated_query_data['end']
+            set_by = validated_query_data['set_by']
+
+            # Get graph data from Project model
+            graph_data = Project.graph_data(start=start, end=end, set_by=set_by)
+
+            return dict(
+                status='success',
+                data=dict(
+                    metadata=project_metadata,
+                    pagination=pagination_data,
+                    # projects=json.loads(project_data),
+                    graph_data=graph_data
+                )
+            ), 200
+
+        return dict(
+            status='success',
+            data=dict(
+                metadata=project_metadata,
+                pagination=pagination_data,
+                projects=json.loads(project_data)
+            )
+        ), 200
 
 class ProjectDetailView(Resource):
 

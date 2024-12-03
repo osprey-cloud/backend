@@ -2466,6 +2466,24 @@ paths:
           name: project_type
           type: string
           description: Shows the type of project. Corresponds to the predifined types like Research, Student, Personal, Commercial or Other.
+
+          name: series
+          type: boolean
+          description: Returns graph data when set to true
+        - in: query
+          name: start
+          type: string
+          description: Start date format (YYYY-MM-DD)
+        - in: query
+          name: end
+          type: string
+          description: End date format (YYYY-MM-DD)
+        - in: query
+          name: set_by
+          type: string
+          description: Either month or year
+
+
       responses:
         200:
           description: "Success"
@@ -3812,6 +3830,8 @@ paths:
           name: keywords
           type: string
           description: Enter keywords if searching
+
+          
       responses:
         200:
           description: "Success"
