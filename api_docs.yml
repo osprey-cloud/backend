@@ -69,6 +69,22 @@ paths:
           type: boolean
           description: Either True or False.e
 
+          name: series
+          type: boolean
+          description: Returns graph data when set to true
+        - in: query
+          name: start
+          type: string
+          description: Start date format (YYYY-MM-DD)
+        - in: query
+          name: end
+          type: string
+          description: End date format (YYYY-MM-DD)
+        - in: query
+          name: set_by
+          type: string
+          description: Either month or year
+
       produces:
         - application/json
       responses:
