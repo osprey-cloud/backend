@@ -141,6 +141,14 @@ class UsersView(Resource):
         keywords = request.args.get('keywords', '')
         verified = request.args.get('verified', None)
         is_beta = request.args.get('is_beta', None)
+        series = request.args.get('series', 'false').lower() == 'true'
+
+    # Graph filter data
+        graph_filter_data = {
+        'start': request.args.get('start', '2018-01-01'),
+        'end': request.args.get('end', datetime.now().strftime('%Y-%m-%d')), 
+        'set_by': request.args.get('set_by', 'month')
+    }
         total_users = len(User.find_all())
 
         users = []
@@ -244,7 +252,30 @@ class UsersView(Resource):
 
         if errors:
             return dict(status='fail', message=errors), 400
+        
 
+
+        if series:
+            validated_query_data, errors = UserGraphSchema().load(graph_filter_data)
+            if errors:
+                return dict(status='fail', message=errors), 400
+
+            start = validated_query_data['start']
+            end = validated_query_data['end']
+            set_by = validated_query_data['set_by']
+
+            # Assuming User has a method for graph data
+            graph_data = User.graph_data(start=start, end=end, set_by=set_by)
+
+            return dict(
+                status='success',
+                data=dict(
+                    meta_data=meta_data,
+                    pagination=pagination,
+                    graph_data=graph_data
+                )
+            ), 200
+    
         return dict(
             status='success',
             data=dict(meta_data=meta_data, pagination=pagination,
