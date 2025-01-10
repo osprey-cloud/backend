@@ -43,9 +43,9 @@ class ActivityFeedView(Resource):
         public_activities = []
 
         while len(public_activities)<= 0 or len(public_activities)< 10:
-            print(pagination_data)
-            if pagination_data['next_page']:
-                user_feed = get_logs({**params , 'page': pagination_data['next_page']})
+            next_page = pagination_data.get('next_page', None)
+            if next_page:
+                user_feed = get_logs({**params , 'page': next_page})
                 if user_feed.status_code != 200:
                     return dict(status='fail', message='Failed to fetch user feed'), 500
                 user_feed = user_feed.json()

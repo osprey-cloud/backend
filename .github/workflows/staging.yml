@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - staging
-      - ch-stagingdeployements
 
   workflow_dispatch:
 
