@@ -37,7 +37,7 @@ class AppSchema(Schema):
     custom_domain = fields.String(validate=validate.Regexp(
         regex=r'^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$',
         error='custom domain should be a valid domain, no protocal required'))
-    replicas = fields.Int(validate=validate.Range(min=1, max=4))
+    replicas = fields.Int(validate=validate.Range(min=1, max=3))
     date_created = fields.Date(dump_only=True)
     age = fields.Method("get_age", dump_only=True)
     has_custom_domain = fields.Boolean()

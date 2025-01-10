@@ -128,6 +128,8 @@ jobs:
           --set environment.GITHUB_CLIENT_SECRET="${{ secrets.STAGING_GITHUB_CLIENT_SECRET }}" \
           --set environment.NEW_RELIC_LICENSE_KEY="${{ secrets.STAGING_NEW_RELIC_LICENSE_KEY }}" \
           --set environment.KUBE_SERVICE_PORT="${{ secrets.STAGING_KUBE_SERVICE_PORT }}" \
+          --set environment.LOGGER_APP_URL="${{ secrets.MICROSERVICE_LOGGER_APP_URL }}" \
+          --set environment.MLOPS_API_URL="${{ secrets.MICROSERVICE_MLOPS_API_URL }}" \
           --timeout=300s
 
       - name: Monitor Rollout

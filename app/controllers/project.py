@@ -338,7 +338,7 @@ class ProjectsView(Resource):
         user.save()
         # ADD a logger for when user.save does not work
 
-         # If series is requested, include graph data based on filtered dates
+        # If series is requested, include graph data based on filtered dates
         if series:
             validated_query_data, errors = ProjectGraphSchema().load(graph_filter_data)
             if errors:
@@ -349,7 +349,8 @@ class ProjectsView(Resource):
             set_by = validated_query_data['set_by']
 
             # Get graph data from Project model
-            graph_data = Project.graph_data(start=start, end=end, set_by=set_by)
+            graph_data = Project.graph_data(
+                start=start, end=end, set_by=set_by)
 
             return dict(
                 status='success',
@@ -369,6 +370,7 @@ class ProjectsView(Resource):
                 projects=json.loads(project_data)
             )
         ), 200
+
 
 class ProjectDetailView(Resource):
 
