@@ -114,7 +114,6 @@ jobs:
           helm upgrade \
           --install \
           cranecloud-backend ./helm/chart \
-          --version 0.1.4 \
           --values helm/values.staging.yaml \
           --namespace cranecloud \
           --set image.tag="${{ needs.build.outputs.tag }}" \
