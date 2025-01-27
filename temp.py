@@ -1,5 +1,5 @@
 
-from app.tasks import say_hello
+from app.tasks import hello
 
 
-say_hello.delay()
+hello.delay()

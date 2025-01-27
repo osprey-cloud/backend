@@ -6,6 +6,7 @@ on:
     types:
       - released
       - prereleased
+
 jobs:
   build:
     outputs:
@@ -16,15 +17,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          ref: staging
+          ref: master
 
       - name: Install (Buildx)
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login (GCP)
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.CREDENTIALS_JSON }}
 
@@ -90,7 +91,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Login (GCP)
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.CREDENTIALS_JSON }}
 
@@ -107,18 +108,17 @@ jobs:
           location: us-central1-a
           project_id: crane-cloud-274413
 
-      - name: Add Repo (cranecloud-backend)
+      - name: Add Repo (cranecloud)
         run: |
-          helm repo add cranecloud-backend https://crane-cloud.github.io/helm-charts/
+          helm repo add cranecloud https://crane-cloud.github.io/helm-charts/
 
       - name: Helm Release
         run: |
-          helm upgrade \
-          --install \
-          cranecloud-backend cranecloud-backend/cranecloud-backend \
-          --version 0.1.4 \
+          helm upgrade --install \
+          cranecloud-backend  cranecloud/cranecloud \
+          --version 0.1.7 \
           --values helm/values.prod.yaml \
-          --namespace cranecloud-prod \
+          --namespace $namespace \
           --set image.tag="${{ needs.build.outputs.tag }}" \
           --set environment.ADMIN_MYSQL_PASSWORD="${{ secrets.PRODUCTION_ADMIN_MYSQL_PASSWORD }}" \
           --set environment.ADMIN_PSQL_PASSWORD="${{ secrets.PRODUCTION_ADMIN_PSQL_PASSWORD }}" \
@@ -131,9 +131,11 @@ jobs:
           --set environment.NEW_RELIC_LICENSE_KEY="${{ secrets.PRODUCTION_NEW_RELIC_LICENSE_KEY }}" \
           --set environment.KUBE_SERVICE_PORT="${{ secrets.PRODUCTION_KUBE_SERVICE_PORT }}" \
           --set environment.SYSTEM_DOCKER_EMAIL="${{ secrets.PRODUCTION_SYSTEM_DOCKER_EMAIL }}" \
+          --set environment.MLOPS_API_URL="${{ secrets.PRODUCTION_MLOPS_API_URL }}" \
           --set environment.SYSTEM_DOCKER_PASSWORD="${{ secrets.PRODUCTION_SYSTEM_DOCKER_PASSWORD }}" \
+          --set environment.LOGGER_APP_URL="${{ secrets.PRODUCTION_LOGGER_APP_URL }}" \
           --timeout=300s
 
       - name: Monitor Rollout
         run: |
-          kubectl rollout status deployment/cranecloud-backend --timeout=300s --namespace cranecloud-prod
+          kubectl rollout status deployment/cranecloud-backend --timeout=300s --namespace $namespace
