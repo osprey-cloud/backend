@@ -9,6 +9,9 @@ on:
   push:
     branches:
       - ft-add-logger-to-prod
+
+  workflow_dispatch:
+
 jobs:
   build:
     outputs:
@@ -140,4 +143,4 @@ jobs:
 
       - name: Monitor Rollout
         run: |
-          kubectl rollout status deployment/cranecloud-backend --timeout=300s --namespace cranecloud-prod
+          kubectl rollout status deployment/cranecloud-backend --timeout=300s --namespace $namespace
