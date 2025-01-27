@@ -17,10 +17,12 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -32,7 +34,8 @@ service:
   type: NodePort
   port: 80
 
-resources: {}
+resources:
+  {}
   # limits:
   #   cpu: 512m
   #   memory: 512Mi
@@ -46,14 +49,15 @@ tolerations: []
 
 affinity: {}
 
-nginxConf:
-  server {
-        listen 80;
+nginxConf: server {
+    listen 80;
 
-        location / {
-            proxy_pass http://localhost:5000/;
-        }
+    location / {
+      proxy_pass http://localhost:5000/;
     }
+  }
+
+port: 5000
 
 environment:
   ADMIN_MYSQL_HOST: 102.134.147.233
@@ -82,3 +86,13 @@ environment:
   KUBE_SERVICE_PORT: ${{ KUBE_SERVICE_PORT}}
   SYSTEM_DOCKER_EMAIL: ${{ SYSTEM_DOCKER_EMAIL }}
   SYSTEM_DOCKER_PASSWORD: ${{ SYSTEM_DOCKER_PASSWORD }}
+
+celery:
+  create: true
+  command:
+    - "celery"
+    - "-A"
+    - "server.celery"
+    - "worker"
+    - "--loglevel=info"
+  port: 5001
