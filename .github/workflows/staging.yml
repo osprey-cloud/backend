@@ -4,7 +4,7 @@ name: staging
 on:
   push:
     branches:
-      - staging
+      - ft-add-logger-to-prod
 
   workflow_dispatch:
 
