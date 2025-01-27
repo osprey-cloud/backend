@@ -93,7 +93,7 @@ celery:
   create: true
   command:
     - "celery"
-    - "-A "
+    - "-A"
     - "server.celery"
     - "worker"
     - "--loglevel=info"

@@ -14,5 +14,4 @@ def is_valid_email(email: str) -> bool:
         smtp_skip_tls=False,
         smtp_tls_context=None,
         smtp_debug=False,
-        
     )

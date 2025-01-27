@@ -53,8 +53,8 @@ class UsersView(Resource):
 
         email = validated_user_data.get('email', None)
 
-        if not is_valid_email(email):
-            return dict(status='fail', message=f'Invalid email address'), 400
+        # if not is_valid_email(email):
+        #     return dict(status='fail', message=f'Invalid email address'), 400
 
         client_base_url = os.getenv(
             'CLIENT_BASE_URL',
