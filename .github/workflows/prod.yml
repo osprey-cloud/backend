@@ -6,11 +6,6 @@ on:
     types:
       - released
       - prereleased
-  push:
-    branches:
-      - ft-add-logger-to-prod
-
-  workflow_dispatch:
 
 jobs:
   build:
@@ -24,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ft-add-logger-to-prod
+          ref: master
 
       - name: Install (Buildx)
         uses: docker/setup-buildx-action@v3
@@ -123,7 +118,7 @@ jobs:
           cranecloud-backend  cranecloud/cranecloud \
           --version 0.1.7 \
           --values helm/values.prod.yaml \
-          --namespace cranecloud-prod \
+          --namespace $namespace \
           --set image.tag="${{ needs.build.outputs.tag }}" \
           --set environment.ADMIN_MYSQL_PASSWORD="${{ secrets.PRODUCTION_ADMIN_MYSQL_PASSWORD }}" \
           --set environment.ADMIN_PSQL_PASSWORD="${{ secrets.PRODUCTION_ADMIN_PSQL_PASSWORD }}" \
