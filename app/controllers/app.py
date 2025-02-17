@@ -538,7 +538,7 @@ class AppDetailView(Resource):
             if not cluster:
                 return dict(status='fail', message=f'Cluster with id {project.cluster_id} does not exist'), 404
 
-            kube_client = create_kube_clients(cluster.host, cluster.token)          
+            kube_client = create_kube_clients(cluster.host, cluster.token)
             try:
                 app_status_object = kube_client.appsv1_api.read_namespaced_deployment_status(
                     f"{app_list['alias']}-deployment", project.alias)
@@ -546,8 +546,8 @@ class AppDetailView(Resource):
                 if exc.status == 404:
                     return dict(status='fail', data=dict(apps=app_list), message="Application does not exist on the cluster"), 200
                 return dict(status='fail', data=dict(apps=app_list), message=str(exc)), 500
-
             app_list.update(self.extract_app_details(app_status_object))
+
             app_list["pod_statuses"] = self.get_pod_statuses(
                 kube_client, project.alias, app_list['alias'])
 
@@ -581,8 +581,12 @@ class AppDetailView(Resource):
 
     @staticmethod
     def get_pod_statuses(kube_client, namespace, app_alias):
-        pods = kube_client.kube.list_namespaced_pod(
-            namespace, label_selector=f"app={app_alias}")
+        try:
+            pods = kube_client.kube.list_namespaced_pod(
+                namespace, label_selector=f"app={app_alias}")
+        except Exception as e:
+            current_app.logger.error(f"Error fetching pods: {str(e)}")
+            return []
         pod_statuses = []
 
         for i, pod in enumerate(pods.items):
