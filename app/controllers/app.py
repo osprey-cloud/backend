@@ -129,6 +129,7 @@ class AppsView(Resource):
         per_page = request.args.get('per_page', 10, type=int)
         series = request.args.get('series', False)
         disabled = request.args.get('disabled', None)
+        is_notebook = request.args.get('is_notebook', None)
 
         if isinstance(series, str):
             series = series.lower() == 'true'
@@ -139,6 +140,7 @@ class AppsView(Resource):
         # since it is a one to one
         metadata = {
             'disabled': App.query.filter_by(disabled=True).count(),
+            'is_notebook': App.query.filter_by(is_notebook=True).count(),
             'total_apps': App.query.count(),
             'failing_apps': AppState.query.filter_by(status="failed").count(),
             'running_apps': AppState.query.filter_by(status="running").count(),
@@ -148,6 +150,9 @@ class AppsView(Resource):
             query = App.query
             if disabled is not None:
                 query = query.filter_by(disabled=disabled)
+
+            if is_notebook is not None:
+                query = query.filter_by(is_notebook=is_notebook)
 
             paginated_apps = query.paginate(
                 page=page, per_page=per_page, error_out=False)
