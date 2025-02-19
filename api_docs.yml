@@ -3204,6 +3204,10 @@ paths:
           type: boolean
           description: Returns disabled applications
         - in: query
+          name: is_notebook
+          type: boolean
+          description: Returns applications with is_notebook set to true
+        - in: query
           name: active
           type: boolean
           description: Returns active applications

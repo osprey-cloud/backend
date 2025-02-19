@@ -1,14 +1,12 @@
 import datetime
 import json
 from types import SimpleNamespace
-import uuid
 from app.helpers.cost_modal import CostModal
 from app.helpers.alias import create_alias
 from app.helpers.admin import is_authorised_project_user, is_owner_or_admin, is_current_or_admin, is_admin
 from app.helpers.role_search import has_role
 from app.helpers.activity_logger import log_activity
 from app.helpers.kube import create_kube_clients, delete_cluster_app, disable_project, enable_project, check_kube_error_code
-from app.helpers.tags import add_tags_to_project, create_tags, remove_tags_from_project
 from app.models.billing_invoice import BillingInvoice
 from app.models.project_users import ProjectUser
 from app.models.user import User
@@ -17,7 +15,6 @@ from app.models.project import Project
 from app.schemas import ProjectSchema, AppSchema, ProjectUserSchema, ClusterSchema
 from app.helpers.decorators import admin_required
 import datetime
-from app.schemas.tags import TagSchema
 from flask_restful import Resource, request
 from kubernetes import client
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt_claims
@@ -60,7 +57,6 @@ class ProjectsView(Resource):
                 message=f'''project with name {
                     validated_project_data["name"]} already exists'''
             ), 409
-
         try:
             validated_project_data['alias'] =\
                 create_alias(validated_project_data['name'])
@@ -73,11 +69,6 @@ class ProjectsView(Resource):
                     status='fail',
                     message=f'cluster {cluster_id} not found'
                 ), 404
-
-            tags = None
-            if validated_project_data.get('tags_add'):
-                tags = validated_project_data['tags_add']
-                validated_project_data.pop('tags_add', None)
 
             kube_host = cluster.host
             kube_token = cluster.token
@@ -152,8 +143,6 @@ class ProjectsView(Resource):
                 kube_client.kube.delete_namespace(namespace_name)
 
                 return dict(status="fail", message="Internal Server Error"), 500
-            if tags:
-                add_tags_to_project(tags, project)
 
             # create a billing invoice on project creation
             new_invoice = BillingInvoice(project_id=project.id)
@@ -189,7 +178,7 @@ class ProjectsView(Resource):
             log_activity('Project', status='Success',
                          operation='Create',
                          description='Created project Successfully',
-                         a_project=project,
+                         a_project_id=project.id,
                          a_cluster_id=cluster_id)
 
             return dict(status='success', data=dict(project=new_project_data)), 201
@@ -202,13 +191,9 @@ class ProjectsView(Resource):
             return dict(status='fail', message=str(e.body)), check_kube_error_code(e.status)
 
         except Exception as err:
-            try:
-                err = err.body
-            except:
-                err = str(err)
             log_activity('Project', status='Failed',
                          operation='Create',
-                         description=err,
+                         description=err.body,
                          a_cluster_id=cluster_id)
             return dict(status='fail', message=str(err)), 500
 
@@ -338,7 +323,7 @@ class ProjectsView(Resource):
         user.save()
         # ADD a logger for when user.save does not work
 
-        # If series is requested, include graph data based on filtered dates
+         # If series is requested, include graph data based on filtered dates
         if series:
             validated_query_data, errors = ProjectGraphSchema().load(graph_filter_data)
             if errors:
@@ -349,15 +334,13 @@ class ProjectsView(Resource):
             set_by = validated_query_data['set_by']
 
             # Get graph data from Project model
-            graph_data = Project.graph_data(
-                start=start, end=end, set_by=set_by)
+            graph_data = Project.graph_data(start=start, end=end, set_by=set_by)
 
             return dict(
                 status='success',
                 data=dict(
                     metadata=project_metadata,
                     pagination=pagination_data,
-                    # projects=json.loads(project_data),
                     graph_data=graph_data
                 )
             ), 200
@@ -370,7 +353,6 @@ class ProjectsView(Resource):
                 projects=json.loads(project_data)
             )
         ), 200
-
 
 class ProjectDetailView(Resource):
 
@@ -483,7 +465,7 @@ class ProjectDetailView(Resource):
             log_activity('Project', status='Success',
                          operation='Delete',
                          description='Deleted project Successfully',
-                         a_project=project,
+                         a_project_id=project.id,
                          a_cluster_id=project.cluster_id)
             return dict(
                 status='success',
@@ -508,7 +490,7 @@ class ProjectDetailView(Resource):
                 log_activity('Project', status='Success',
                              operation='Delete',
                              description='Deleted project Successfully',
-                             a_project=project,
+                             a_project_id=project.id,
                              a_cluster_id=project.cluster_id)
                 return dict(
                     status='success',
@@ -539,7 +521,7 @@ class ProjectDetailView(Resource):
             current_user_roles = get_jwt_claims()['roles']
 
             project_schema = ProjectSchema(
-                only=("name", "description", "organisation", "project_type", "is_public", "tags_add", "tags_remove"), partial=True)
+                only=("name", "description", "organisation", "project_type"), partial=True)
 
             project_data = request.get_json()
 
@@ -571,22 +553,13 @@ class ProjectDetailView(Resource):
                 if not is_authorised_project_user(project, current_user_id, 'admin'):
                     return dict(status='fail', message='unauthorised'), 403
 
-            if validate_project_data.get('tags_add'):
-                add_tags_to_project(
-                    validate_project_data['tags_add'], project)
-                validate_project_data.pop('tags_add', None)
-            if validate_project_data.get('tags_remove'):
-                remove_tags_from_project(
-                    validate_project_data['tags_remove'], project)
-                validate_project_data.pop('tags_remove', None)
-
             updated = Project.update(project, **validate_project_data)
 
             if not updated:
                 log_activity('Project', status='Failed',
                              operation='Update',
                              description='Internal Server Error',
-                             a_project=project,
+                             a_project_id=project.id,
                              a_cluster_id=project.cluster_id
                              )
                 return dict(status='fail', message='internal server error'), 500
@@ -594,7 +567,7 @@ class ProjectDetailView(Resource):
             log_activity('Project', status='Success',
                          operation='Update',
                          description='Updated project Successfully',
-                         a_project=project,
+                         a_project_id=project.id,
                          a_cluster_id=project.cluster_id)
             return dict(
                 status='success',
@@ -634,7 +607,7 @@ class UserProjectsView(Resource):
         ).all()
 
         pagination_meta_data, projects = paginate(
-            user.projects[::-1], per_page, page)
+            user.projects, per_page, page)
 
         user_projects, errors = project_schema.dumps(
             projects)
@@ -648,7 +621,7 @@ class UserProjectsView(Resource):
             status='success',
             data=dict(
                 pagination={**pagination_meta_data,
-                            'pinned_count': len(json.loads(pinned_projects))},
+                            'pinned_count': len(pinned_projects)},
                 pinned=json.loads(pinned_projects),
                 projects=json.loads(user_projects),
             )
