@@ -775,7 +775,36 @@ paths:
           description: "Bad request"
         500:
           description: "Internal Server Error"
-
+  "/users/inactive_user_reminder":
+    post:
+      tags:
+        - inactive_user_reminder
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          type: string
+          description: "Bearer [token]"
+        - in: query
+          name: value
+          required: true
+          type: integer
+          description: "Numeric value for the time period"
+        - in: query
+          name: unit
+          required: true
+          type: string
+          enum: [hours, days, months]
+          description: "Unit of time (hours/days/months)"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Success"
+        400:
+          description: "Bad request - Invalid parameters"
+        500:
+          description: "Internal Server Error"
   "/clusters":
     post:
       tags:
