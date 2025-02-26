@@ -3,9 +3,10 @@ from math import ceil
 import os
 from types import SimpleNamespace
 from app.helpers.activity_logger import log_activity
+from app.helpers.inactiveUser_notification import send_inactive_notification_to_user
 from app.helpers.kube import disable_project, enable_project
 from flask import current_app, render_template
-from flask_restful import Resource, request
+from flask_restful import Resource, request,reqparse
 from flask_bcrypt import Bcrypt
 from app.schemas import UserSchema, UserGraphSchema, ActivityLogSchema
 from app.models.user import User
@@ -1333,4 +1334,75 @@ class UserFollowersView(Resource):
         return dict(
             status='success',
             data=dict(followers=json.loads(users_data))
+        ), 200
+
+
+
+class SendInactiveUserMailReminder(Resource):
+    @admin_required
+    def post(self):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('value', type=int, required=True, 
+                          help='Time period value is required')
+        parser.add_argument('unit', type=str, required=True, 
+                          choices=('hours', 'days', 'months'),
+                          help='Time unit must be hours, days, or months')
+
+        args = parser.parse_args()
+        value = args['value']
+        unit = args['unit'].lower()
+
+        now = datetime.now()
+        if unit == 'hours':
+            lower_threshold = now - timedelta(hours=value)
+            upper_threshold = now - timedelta(hours=value-1)
+        elif unit == 'days':
+            lower_threshold = now - timedelta(days=value)
+            upper_threshold = now - timedelta(days=value-1)
+        else:  
+            lower_threshold = now - timedelta(days=value * 30)
+            upper_threshold = now - timedelta(days=(value-1) * 30) 
+        
+       
+        inactive_users = User.query.filter(
+            User.last_seen <= upper_threshold,
+            User.last_seen > lower_threshold,
+        
+            User.verified == True,  
+            User.disabled == False, 
+            User.admin_disabled == False  
+        ).all()
+        
+        already_notified = set()  
+
+        emails_sent = 0
+        errors = []
+        
+        for user in inactive_users:
+            try:
+                success = send_inactive_notification_to_user(
+                    email=user.email,
+                    name=user.name,
+                    app=current_app._get_current_object(),
+                    template="user/inactive_user_reminder.html",
+                    subject="Checking In: Your Crane Cloud Account",
+                    date=now.strftime("%m/%d/%Y"),
+                    is_success_template=True
+                )
+                
+                if success:
+                    emails_sent += 1
+                    already_notified.add(user.email)
+                else:
+                    errors.append(f"Failed to send email to {user.email}")
+                    
+            except Exception as e:
+                errors.append(f"Error sending email to {user.email}: {str(e)}")
+        
+        return dict(
+            status='success',
+            message=f'Successfully sent {emails_sent} reminder emails',
+            total_users_processed=len(inactive_users),
+            errors=errors if errors else None
         ), 200
