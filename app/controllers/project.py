@@ -605,24 +605,41 @@ class UserProjectsView(Resource):
             ProjectUser.pinned == True,
             Project.deleted == False
         ).all()
+        
+        # returns deleted projects
+        # pagination_meta_data, projects = paginate(
+        #     user.projects, per_page, page)
 
-        pagination_meta_data, projects = paginate(
-            user.projects, per_page, page)
+        pagination = Project.query.filter(or_(Project.owner_id == current_user_id, Project.users.any(
+                            ProjectUser.user_id == current_user_id))).order_by(Project.date_created.desc()).paginate(
+                            page=page, per_page=per_page, error_out=False)
+        
+        projects = pagination.items
+        if pagination:
+            pagination_data = {
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'page': pagination.page,
+                'per_page': pagination.per_page,
+                'next': pagination.next_num,
+                'prev': pagination.prev_num
+            }
 
-        user_projects, errors = project_schema.dumps(
-            projects)
-
+        user_projects, errors = project_schema.dumps(projects)
+ 
         pinned_projects, errs = project_schema.dumps(pinned_projects)
 
-        if errors and errs:
+        parsed_pinned_projects = json.loads(pinned_projects)
+
+        if errors or errs:
             return dict(status='fail', message='Internal server error'), 500
 
         return dict(
             status='success',
             data=dict(
-                pagination={**pagination_meta_data,
-                            'pinned_count': len(pinned_projects)},
-                pinned=json.loads(pinned_projects),
+                pagination={**pagination_data,
+                            'pinned_count': len(parsed_pinned_projects)},
+                pinned=parsed_pinned_projects,
                 projects=json.loads(user_projects),
             )
         ), 200
