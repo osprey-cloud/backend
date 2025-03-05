@@ -363,6 +363,8 @@ class ProjectDetailView(Resource):
         current_user_id = get_jwt_identity()
         current_user_roles = get_jwt_claims()['roles']
 
+        public_view = request.args.get('public_view', False)
+
         project_schema = ProjectSchema()
 
         project = Project.get_by_id(project_id)
@@ -373,9 +375,16 @@ class ProjectDetailView(Resource):
                 message=f'project {project_id} not found'
             ), 404
 
+        if public_view:
+            project_data, errors = project_schema.dumps(project)
+            if errors:
+                return dict(status='fail', message=errors), 500
+            return dict(status='success', data=dict(project=json.loads(project_data))), 200
+
         if not is_owner_or_admin(project, current_user_id, current_user_roles):
             if not is_authorised_project_user(project, current_user_id, 'member'):
                 return dict(status='fail', message='unauthorised'), 403
+                
 
         project_data, errors = project_schema.dumps(project)
         if errors:

@@ -2555,6 +2555,10 @@ paths:
           name: project_id
           required: true
           type: string
+        - in: query
+          name: public_view
+          type: string
+          description: True if project is being viewed by other users
 
       responses:
         200:
