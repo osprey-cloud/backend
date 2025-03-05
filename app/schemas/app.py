@@ -8,14 +8,14 @@ class AppSchema(Schema):
 
     id = fields.String(dump_only=True)
 
-    name = fields.String(required=True, error_messgae={
+    name = fields.String(required=True, error_messages={
         "required": "name is required"},
         validate=[
             validate.Regexp(
                 regex=r'^(?!\s*$)', error='name should be a valid string'
             ),
     ])
-    image = fields.String(required=True, error_message={
+    image = fields.String(required=True, error_messages={
         "required": "image is required"},
         validate=[
             validate.Regexp(
@@ -47,6 +47,10 @@ class AppSchema(Schema):
     app_status = fields.Nested(AppStateSchema, many=True, dump_only=True)
     is_ai = fields.Boolean(required=False)
     is_notebook = fields.Boolean(required=False)
+    is_modal = fields.Bool(required=False)
+    model_image_uri = fields.Str(required=False)
+    api_type = fields.Str(required=False)
+    model_server = fields.Str(required=False)
 
     def get_age(self, obj):
         return get_item_age(obj.date_created)
@@ -79,3 +83,20 @@ class AppDeploySchema(AppSchema):
 class MLAppDeploySchema(Schema):
     name = fields.String(required=True)
     is_notebook = fields.Boolean(required=True)
+    is_modal = fields.Bool(required=False)
+    model_image_uri = fields.Str(required=False)
+    api_type = fields.Str(required=False, default="REST", validate=validate.OneOf(
+        ["REST", "GRPC"]
+    ))
+    model_server = fields.Str(required=False, default="MLFLOW_SERVER", validate=validate.OneOf(
+        [
+            "SKLEARN_SERVER",
+            "TENSORFLOW_SERVER",
+            "XGBOOST_SERVER",
+            "MLFLOW_SERVER",
+            "TRITON_SERVER",
+            "TEMPO_SERVER",
+            "HUGGINGFACE_SERVER",
+            "CUSTOM_INFERENCE_SERVER"
+        ]
+    ))
