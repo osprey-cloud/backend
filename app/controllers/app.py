@@ -500,8 +500,7 @@ class MLProjectAppsView(Resource):
             return dict(status='fail', message=response.json().get('message')), response.status_code
 
         response_data = response.json().get('app', {})
-        # print(response_data)
-        # return True
+
         new_app = App(**response_data)
 
         saved_app = new_app.save()
