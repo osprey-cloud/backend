@@ -480,8 +480,7 @@ class MLProjectAppsView(Resource):
         project_data, errors = project_schema.dumps(project)
         cluster_data, errors = cluster_schema.dumps(cluster)
         data = dict(
-            name=validated_app_data.get('name', None),
-            is_notebook=validated_app_data.get('is_notebook', True),
+            **validated_app_data,
             project=json.loads(project_data),
             # user=user
             cluster=json.loads(cluster_data)
@@ -501,6 +500,7 @@ class MLProjectAppsView(Resource):
             return dict(status='fail', message=response.json().get('message')), response.status_code
 
         response_data = response.json().get('app', {})
+
         new_app = App(**response_data)
 
         saved_app = new_app.save()

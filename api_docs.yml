@@ -2511,7 +2511,7 @@ paths:
           name: project_type
           type: string
           description: Shows the type of project. Corresponds to the predifined types like Research, Student, Personal, Commercial or Other.
-
+        - in: query
           name: series
           type: boolean
           description: Returns graph data when set to true
@@ -2779,6 +2779,55 @@ paths:
           description: "Project not found"
         400:
           description: "Bad request"
+        500:
+          description: "Internal Server Error"
+
+  "/projects/{project_id}/apps/ml":
+    post:
+      tags:
+        - apps
+      consumes:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+        - in: path
+          name: project_id
+          required: true
+          type: string
+        - in: body
+          name: project
+          schema:
+            required:
+              - name
+              - is_notebook
+            properties:
+              name:
+                type: string
+              is_notebook:
+                type: boolean
+              is_modal:
+                type: boolean
+                example: false
+              model_image_uri:
+                type: string
+                example: ""
+              api_type:
+                type: string
+                example: "REST"
+              model_server:
+                type: string
+                example: "MLFLOW_SERVER"
+      produces:
+        - application/json
+      responses:
+        201:
+          description: "Success"
+        400:
+          description: "Bad request"
+        409:
+          description: "Error"
         500:
           description: "Internal Server Error"
 
@@ -3264,44 +3313,6 @@ paths:
           description: "Success"
         400:
           description: "Bad request"
-        500:
-          description: "Internal Server Error"
-
-  "/projects/{project_id}/apps/ml":
-    post:
-      tags:
-        - apps
-      consumes:
-        - application/json
-      parameters:
-        - in: header
-          name: Authorization
-          required: true
-        - in: path
-          name: project_id
-          required: true
-          type: string
-        - in: body
-          name: project
-          schema:
-            required:
-              - name
-              - is_notebook
-            properties:
-              name:
-                type: string
-              is_notebook:
-                type: boolean
-
-      produces:
-        - application/json
-      responses:
-        201:
-          description: "Success"
-        400:
-          description: "Bad request"
-        409:
-          description: "Error"
         500:
           description: "Internal Server Error"
 
